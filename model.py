@@ -72,7 +72,7 @@ def duplicate(sequence):
         return [item for sublist in t for item in sublist]
 
     sequence = flatten([sequence, sequence])
-    return sequence # duplication occured
+    return tuple(sequence) # duplication occured
 
 def mutate(sequence, p):
     def flip(bit):
@@ -274,7 +274,7 @@ def step():
 
 
 def run():
-    for i in range(6000):
+    for i in range(100):
         print("iteration: ", i)
         # count unique genomes
         # genomes = [list(genome) for genome in set([tuple(agent["genome"]) for agent in population])]
@@ -288,7 +288,7 @@ def run():
 
 if __name__ == "__main__":
     
-    N = 1000
+    N = 500
 
     initialize()
     run()
