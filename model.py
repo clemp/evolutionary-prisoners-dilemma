@@ -73,7 +73,7 @@ def duplicate(sequence):
 def mutate(sequence, p):
     def flip(bit):
         if random.uniform(0,1) <= p:
-            print("flipperoo")
+            # print("flipperoo")
             return (bit + 1) % 2
         else:
             return bit
@@ -142,6 +142,11 @@ def action(history, strategy):
 def step():
     global M
     # each agent competes against each other agent
+
+    # genome proportion lookup to optimize code running
+    genomes = [agent["genome"] for agent in population]
+    genome_proportions = dict((g, genomes.count(g) / len(population)) for g in genomes)
+    
     for i in population:
         for j in population[i["id"] + 1:]:
             # look up history against that agent before selecting response.
@@ -200,13 +205,21 @@ def step():
                 print("something weird.")
 
             # adjust individual fitness for agent i and j
-            i["fitness"] += int(payout[0])
-            if not isinstance(i["fitness"], int):
-                print("something weird.")
-            j["fitness"] += int(payout[1])
+            # proportion of the population with the same genome (strategy) as i
+            xi = genome_proportions[i["genome"]]
+            # proportion of the population with the same genome (strategy) as i
+            xj = genome_proportions[j["genome"]]
+            
+            # calculate score proportional to the strategy the agent played against
+            # this is Si in the original Lindgren paper.
+            i["fitness"] += int(payout[0]) * xj   
+            j["fitness"] += int(payout[1]) * xi
 
             # clear payout
             del payout, i_action, j_action, i_history_j, j_history_i
+    
+    # ** tournament complete, now calculate results **
+
     # calculate average fitness across all agents
     fitness_avg = sum([agent["fitness"] for agent in population]) / len(population)
 
@@ -219,7 +232,7 @@ def step():
         if fitness >= 0:
             # for example s = 50. agent 0 si=55. d=0.1. wi = 55 - 50 = 5. d * wi = 0.5 (agent will reproduce with 50% chance).
             # calculate probability this agent reproduces
-            reproduce = random.uniform(0, 1) <= (1 - d * fitness)
+            reproduce = random.uniform(0, 1) <= (d * fitness)
             
             if (reproduce):
                 # make a copy of the agent
@@ -292,7 +305,7 @@ def run():
 
 if __name__ == "__main__":
     
-    N = 1000
+    N = 100
 
     initialize()
     run()
