@@ -54,7 +54,7 @@ import itertools
 def generateSequences(n):
         lst = list(itertools.product([0, 1], repeat=n))
         sequences = [s for s in lst]
-        return sequences
+        return tuple(sequences)
 
 M = {
     "1": generateSequences(1)
@@ -72,7 +72,7 @@ def duplicate(sequence):
         return [item for sublist in t for item in sublist]
 
     sequence = flatten([sequence, sequence])
-    return tuple(sequence) # duplication occured
+    return sequence # duplication occured
 
 def mutate(sequence, p):
     def flip(bit):
@@ -143,6 +143,7 @@ def action(history, strategy):
             print("weird thing happening in action function")
 
 def step():
+    global M
     # each agent competes against each other agent
     for i in population:
         for j in population[i["id"] + 1:]:
@@ -233,8 +234,8 @@ def step():
                     "memory_history": {}
                 }
                 # apply mutations randomly
-                p_duplicate = pow(10, -5)
-                # p_duplicate = 1
+                # p_duplicate = pow(10, -5)
+                p_duplicate = 1
                 p_mutate = 2 * pow(10, -5)
                 # p_mutate = 1
                 p_split = pow(10, -5)
@@ -245,7 +246,13 @@ def step():
                 if random.uniform(0, 1) <= p_duplicate:
                     new_agent["genome"] = duplicate(new_agent["genome"])
                     new_agent["memory_length"] += 1
-                
+
+                    # update global memory lookup if needed
+                    if new_agent["memory_length"] not in M.keys():
+                        M = {
+                            new_agent["memory_length"]: generateSequences(new_agent["memory_length"])
+                        }
+                    
                 # mutate
                 new_agent["genome"] = mutate(new_agent["genome"], p_mutate)
                 
