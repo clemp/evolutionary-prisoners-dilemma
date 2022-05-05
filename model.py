@@ -57,15 +57,11 @@ def generateSequences(n):
         return tuple(sequences)
 
 M = {
-    "1": generateSequences(1)
+    1: generateSequences(1)
 }
 
 # Mechanism functions
-# Calculate payoff
 
-# Calculate fitness
-
-# 
 # Mutations of strategy
 def duplicate(sequence):
     def flatten(t):
@@ -135,9 +131,10 @@ def action(history, strategy):
     else:
         try:
             memory = len(history)
-            policy = M[str(memory)]
-            action = strategy[policy.index(tuple(history))]
-            return action
+            # why does M not have memory 1?
+            policy = M[memory]
+            policy_action = strategy[policy.index(tuple(history))]
+            return policy_action
         except Exception as ex:
             print(ex)
             print("weird thing happening in action function")
@@ -166,8 +163,8 @@ def step():
 
             if i_action is None:
                 print("weird i_action is none problem")
-                print("player i: ", i)
-                print("player j: ", j)
+                # print("player i: ", i)
+                # print("player j: ", j)
             # record opponent history
             ## check for initial round against this opponent
             
@@ -234,8 +231,8 @@ def step():
                     "memory_history": {}
                 }
                 # apply mutations randomly
-                # p_duplicate = pow(10, -5)
-                p_duplicate = 1
+                p_duplicate = pow(10, -5)
+                # p_duplicate = 1
                 p_mutate = 2 * pow(10, -5)
                 # p_mutate = 1
                 p_split = pow(10, -5)
@@ -249,11 +246,10 @@ def step():
 
                     # update global memory lookup if needed
                     if new_agent["memory_length"] not in M.keys():
-                        M = {
-                            new_agent["memory_length"]: generateSequences(new_agent["memory_length"])
-                        }
+                        M[new_agent["memory_length"]] = generateSequences(new_agent["memory_length"])
                     
                 # mutate
+
                 new_agent["genome"] = mutate(new_agent["genome"], p_mutate)
                 
                 # split
@@ -272,17 +268,18 @@ def step():
                 # remove from the population
                 population[:] = [a for a in population if a.get('id') != agent["id"]]
 
-    # Case: agent dies
-    # erase this agent from the list of agents (population).
+        # Case: agent dies
+        # erase this agent from the list of agents (population).
 
-    # Case: agent reproduces
-    # assign new id to new agent, add that agent to the population. create empty memory list for the new agent in every other agent's memory.
-    # when new agent is reproduced, apply genome mutations with defined probability parameters.
-
+        # Case: agent reproduces
+        # assign new id to new agent, add that agent to the population. create empty memory list for the new agent in every other agent's memory.
+        # when new agent is reproduced, apply genome mutations with defined probability parameters.
+        # reset fitness for the next round.
+        agent["fitness"] = 0
 
 def run():
     for i in range(100):
-        print("iteration: ", i)
+        print("iteration: ", i, " | population:", len(population))
         # count unique genomes
         # genomes = [list(genome) for genome in set([tuple(agent["genome"]) for agent in population])]
         genomes = [agent["genome"] for agent in population]
@@ -295,7 +292,7 @@ def run():
 
 if __name__ == "__main__":
     
-    N = 500
+    N = 1000
 
     initialize()
     run()
